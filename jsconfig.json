@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "jsx": "react-native",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      // Örnek mutlak yollar:
+      // "src/*": ["src/*"],
+      // "@components/*": ["src/components/*"]
+    }
+  },
+  "exclude": ["node_modules"]
+}
