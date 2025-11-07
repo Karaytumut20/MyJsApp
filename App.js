@@ -5,7 +5,7 @@ const App = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>
-        mugessss
+        mugessss11
       </Text>
     </View>
   );
