@@ -3,21 +3,23 @@ import { View, ActivityIndicator, StatusBar, StyleSheet, useColorScheme } from '
 import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { getProfile } from './src/storage/storage';
-// RootStackParamList tip importı kaldırıldı
 
-// Ekranları İçe Aktar (uzantılar .js olarak varsayılır)
+// Ekranları İçe Aktar
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import CompletedScreen from './src/screens/CompletedScreen';
+import StatsScreen from './src/screens/StatsScreen';
+// YENİ EKLENDİ: Hedef yönetim ekranı
+import ManageGoalsScreen from './src/screens/ManageGoalsScreen';
 
-// Tip zorlaması kaldırıldı
+
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   const [initialRoute, setInitialRoute] = useState(null);
   const isDarkMode = useColorScheme() === 'dark';
   
-  // Uygulamanın başlangıç temasını belirle
+  // Tema ayarları
   const theme = {
     ...(isDarkMode ? DarkTheme : DefaultTheme),
     colors: {
@@ -29,12 +31,11 @@ const App = () => {
     },
   };
   
-  // Başlangıç rotasını belirleyen fonksiyon
+  // Başlangıç rotasını belirle
   useEffect(() => {
     const checkProfile = async () => {
       try {
         const profile = await getProfile();
-        // Profil varsa Home'dan, yoksa Onboarding'den başla
         setInitialRoute(profile ? 'Home' : 'Onboarding');
       } catch (e) {
         console.error("Profil kontrol edilirken hata oluştu:", e);
@@ -76,12 +77,23 @@ const App = () => {
         <Stack.Screen 
           name="Home" 
           component={HomeScreen} 
-          options={{ title: 'Günlük Görev' }} 
+          options={{ title: 'Gösterge Paneli' }} // Başlık değişti
         />
         <Stack.Screen 
           name="Completed" 
           component={CompletedScreen} 
-          options={{ title: 'Tamamlananlar' }} 
+          options={{ title: 'Tamamlanan Görevler' }} // Başlık değişti
+        />
+        <Stack.Screen 
+          name="Stats" 
+          component={StatsScreen} 
+          options={{ title: 'İstatistikler' }} 
+        />
+        {/* YENİ EKLENDİ: Hedef yönetim ekranı rotası */}
+        <Stack.Screen 
+          name="ManageGoals" 
+          component={ManageGoalsScreen} 
+          options={{ title: 'Hedefleri Yönet' }} 
         />
       </Stack.Navigator>
     </NavigationContainer>

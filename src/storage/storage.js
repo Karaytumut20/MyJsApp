@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// Tip importları kaldırıldı: UserProfile, Challenge, CompletedItem
+// Tip importları kaldırıldı
 
 // AsyncStorage Anahtarları
 export const USER_PROFILE_KEY = 'user_profile';
 export const TODAY_CHALLENGE_KEY = 'today_challenge';
 export const COMPLETED_CHALLENGES_KEY = 'completed_challenges';
+// YENİ EKLENDİ: Kullanıcının kendi hedefleri için anahtar
+export const USER_GOALS_KEY = 'user_goals';
 
 // Tarih kontrolü için yardımcı fonksiyon
 const getTodayDate = () => {
@@ -33,9 +35,6 @@ export const getProfile = async () => {
 };
 
 // --- GÜNLÜK GÖREV İŞLEMLERİ ---
-
-// Bugünün görevini ve atanma tarihini tutan yapı
-// interface TodayChallengeStore kaldırıldı, sadece JS objesi kullanılıyor.
 
 export const getTodayChallenge = async () => {
   try {
@@ -69,7 +68,7 @@ export const saveTodayChallenge = async (challenge) => {
   }
 };
 
-// --- TAMAMLANAN GÖREV İŞLEMLERİ ---
+// --- TAMAMLANAN GÖREV İŞLEMLERİ (GÜNLÜK) ---
 
 export const getCompletedChallenges = async () => {
   try {
@@ -106,9 +105,79 @@ export const addCompletedChallenge = async (challenge) => {
   }
 };
 
+
+// --- YENİ BÖLÜM: KULLANICI KİŞİSEL HEDEFLERİ (USER GOALS) ---
+
+/**
+ * Kullanıcının tüm kişisel hedeflerini getirir.
+ */
+export const getUserGoals = async () => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(USER_GOALS_KEY);
+    return jsonValue != null ? JSON.parse(jsonValue) : [];
+  } catch (e) {
+    console.error('AsyncStorage: Kişisel hedefleri okuma hatası', e);
+    return [];
+  }
+};
+
+/**
+ * Yeni bir kişisel hedef ekler.
+ * Goal objesi: { title: string, description: string }
+ */
+export const saveNewGoal = async (goal) => {
+  try {
+    const goals = await getUserGoals();
+    const newGoal = {
+      id: Date.now().toString(), // Basit bir benzersiz ID
+      title: goal.title,
+      description: goal.description || '',
+      isCompleted: false, // Başlangıçta tamamlanmadı
+      createdAt: getTodayDate(),
+    };
+    const updatedGoals = [...goals, newGoal];
+    const jsonValue = JSON.stringify(updatedGoals);
+    await AsyncStorage.setItem(USER_GOALS_KEY, jsonValue);
+  } catch (e) {
+    console.error('AsyncStorage: Kişisel hedef kaydetme hatası', e);
+  }
+};
+
+/**
+ * Bir kişisel hedefi siler.
+ */
+export const deleteUserGoal = async (goalId) => {
+  try {
+    const goals = await getUserGoals();
+    const updatedGoals = goals.filter(goal => goal.id !== goalId);
+    const jsonValue = JSON.stringify(updatedGoals);
+    await AsyncStorage.setItem(USER_GOALS_KEY, jsonValue);
+  } catch (e) {
+    console.error('AsyncStorage: Kişisel hedef silme hatası', e);
+  }
+};
+
+/**
+ * Bir kişisel hedefin tamamlanma durumunu değiştirir (işaretle/işareti kaldır).
+ */
+export const toggleGoalCompleted = async (goalId) => {
+  try {
+    const goals = await getUserGoals();
+    const updatedGoals = goals.map(goal => 
+      goal.id === goalId ? { ...goal, isCompleted: !goal.isCompleted } : goal
+    );
+    const jsonValue = JSON.stringify(updatedGoals);
+    await AsyncStorage.setItem(USER_GOALS_KEY, jsonValue);
+  } catch (e) {
+    console.error('AsyncStorage: Kişisel hedef güncelleme hatası', e);
+  }
+};
+
+
 // --- GELİŞTİRME AMAÇLI SIFIRLAMA ---
 export const clearAllData = async () => {
   try {
+    // Tüm anahtarları temizler (USER_GOALS_KEY dahil)
     await AsyncStorage.clear();
     console.log('AsyncStorage başarıyla temizlendi.');
   } catch (e) {
